@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard ตัวชี้วัดโรคหลอดเลือดสมอง (Stroke) จังหวัดกาญจนบุรี</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{color-scheme:light;--ink:#14292f;--sub:#3f565f;--card:#ffffff;--line:#d3e3e6;--field:#fff;--th:#d9ecf0;--accent:#3fb6a0;--ai:#04201f;
+--bg1:#f1f7f6;--bg2:#eef5f5;--bg3:#edf4f8;--bg4:#eaf1f7;--bg5:#eff6f3;--ok:#0f5a30;--bad:#8a1f38;--nd:#3d566a;--okb:#d3f0df;--badb:#f9d6dc;--ndb:#e0e9ef}
+[data-theme=blue]{--bg1:#eef3fa;--bg2:#ebf1f9;--bg3:#e9f0f8;--bg4:#edf2f8;--bg5:#ebf3f7;--line:#c8d8ea;--th:#dce8f5;--accent:#7fb1ea}
+[data-theme=green]{--bg1:#eff7f1;--bg2:#ecf5ef;--bg3:#eaf4f0;--bg4:#eef6f2;--bg5:#ecf6ee;--line:#c6dfcf;--th:#dbeee2;--accent:#6fcf9a}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:'Sarabun','Noto Sans Thai',Tahoma,sans-serif;color:var(--ink);font-size:17px;line-height:1.55;min-height:100vh;
+background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4),var(--bg5));background-attachment:fixed;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:1320px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;justify-content:space-between;background:var(--card);border-radius:20px;padding:18px 22px;border:1px solid var(--line);position:relative;overflow:hidden}
+header::before{content:"";position:absolute;inset:0 0 auto 0;height:8px;background:linear-gradient(90deg,#2f8f6f,#3fb6a0,#3a8fc4,#2a5f9e)}
+.hd{flex:1 1 380px}.art{flex:0 1 340px;max-width:100%;height:auto;filter:drop-shadow(0 6px 10px rgba(22,50,58,.18))}
+h1{margin:6px 0 2px;font-size:1.5rem;font-weight:700}
+.sub{color:var(--sub);font-size:.95rem}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.pill{padding:5px 12px;border-radius:99px;background:var(--field);font-size:.88rem;border:1px solid var(--line)}
+.pill.ok{background:var(--okb);color:var(--ok);border-color:#9fd8b8}.pill.err{background:var(--badb);color:var(--bad);border-color:#efb9c3}.pill.wait{background:#fdf0d0;color:#6b4800;border-color:#ecd28f}
+button,select,input{font:inherit;color:var(--ink);border-radius:12px;border:1px solid var(--line);background:var(--field);padding:7px 12px}
+button{cursor:pointer;font-weight:500}button:hover{background:var(--th)}
+:focus-visible{outline:3px solid #1f4f86;outline-offset:2px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 10px}
+.tabs button{border-radius:99px;padding:8px 18px}.tabs button.on{background:var(--accent);border-color:var(--accent);color:var(--ai);font-weight:700}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;background:var(--card);border:1px solid var(--line);padding:12px;border-radius:16px;margin-bottom:14px;align-items:end}
+.filters label{font-size:.82rem;color:var(--sub);display:block}.filters input,.filters select{width:100%}
+.filters .ck{display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink);padding-bottom:8px}.filters .ck input{width:auto}
+.grid{display:grid;gap:14px}.k5{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.k2{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}
+.card{background:var(--card);border-radius:18px;padding:16px;border:1px solid var(--line)}
+.card h2{font-size:1.1rem;margin:0 0 10px}
+.kpi{padding:0;overflow:hidden}.kpi .top{height:8px}.kpi .in{padding:14px 16px}
+.kpi .nm{font-weight:700}.kpi .fl{font-size:.8rem;color:var(--sub);min-height:2.4em}
+.kpi .n{font-size:2.5rem;font-weight:700;line-height:1.1;margin:6px 0 2px}
+.kpi .d{font-size:.88rem;color:var(--sub)}
+.track{position:relative;height:12px;border-radius:99px;background:#e3edf1;margin:10px 0 6px}
+.track i{position:absolute;left:0;top:0;bottom:0;border-radius:99px}.track b{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--ink);border-radius:2px}
+.badge{display:inline-block;padding:2px 12px;border-radius:99px;color:#fff;font-weight:700;font-size:.85rem}
+.b-ok{background:var(--okb);color:var(--ok);border:1px solid #9fd8b8}.b-bad{background:var(--badb);color:var(--bad);border:1px solid #efb9c3}.b-nd{background:var(--ndb);color:var(--nd);border:1px solid #c3d3de}
+.score{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.sc{border-radius:18px;padding:16px 20px;color:var(--ink)}.sc.ok{background:#e3f4ea;border:1px solid #a9dcc0;border-left:8px solid #2f9a68}.sc.bad{background:#fbeaed;border:1px solid #efb9c3;border-left:8px solid #cf5d78}.sc.ok h2,.sc.ok .big{color:var(--ok)}.sc.bad h2,.sc.bad .big{color:var(--bad)}
+.sc .big{font-size:3.2rem;font-weight:700;line-height:1}.sc .big small{font-size:1.1rem;font-weight:500}.sc h2{margin:0 0 4px;font-size:1.15rem}
+.sc ul{padding-left:0;list-style:none}.sc li{background:#ffffffb3;border-radius:10px;padding:6px 10px;margin:6px 0}.sc li b{font-size:1.05rem}.sc .d{color:var(--sub);font-size:.9rem}
+.kpi.ok{border:2px solid #86cfa8;background:#f4fbf7}.kpi.bad{border:2px solid #e8b8c2;background:#fdf8f9}
+.badge.lg{font-size:1.02rem;padding:4px 16px}
+.sec{display:none}.sec.on{display:block}.sec>*+*{margin-top:14px}
+.cv{position:relative;height:320px}.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th{background:var(--th);text-align:left;padding:9px 10px;white-space:nowrap}td{padding:8px 10px;border-bottom:1px solid var(--line)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:700;background:var(--th)}
+.hm td{text-align:center;color:var(--ink);font-weight:700;border:2px solid #fff}.hm td.nm{text-align:left;color:var(--ink);background:none;font-weight:500;border:0;border-bottom:1px solid var(--line)}
+.hm td.nd{background:#dfe9ef;color:var(--sub);font-weight:400}.hm td.ok{background:#cfeedd;color:#0f4d2a}.hm td.bad{background:#f8d3da;color:#7d1d33}
+.hm th{text-align:center;font-size:.82rem;white-space:normal;min-width:110px}
+ul{margin:6px 0 0;padding-left:1.2em}li{margin:3px 0}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--sub);margin-top:8px}.lg span:before{border:1px solid #0002;content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+.note{font-size:.85rem;color:var(--sub)}
+@media(max-width:600px){.k2{grid-template-columns:1fr}.kpi .n{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="hd">
+  <h1>ตัวชี้วัดโรคหลอดเลือดสมอง (Stroke) จังหวัดกาญจนบุรี</h1>
+  <div class="sub" id="fy">สำนักงานสาธารณสุขจังหวัดกาญจนบุรี · เชื่อมต่อ Google Sheet โดยตรง</div>
+  <div class="bar">
+    <span class="pill wait" id="st">กำลังโหลดข้อมูล…</span>
+    <span class="pill" id="upd">อัปเดตล่าสุด: -</span>
+    <span class="pill" id="cd">รีเฟรชใน - วินาที</span>
+    <button id="rf">รีเฟรชทันที</button>
+    <label class="note">ชุดสี <select id="th"><option value="rb">เขียว-น้ำเงินอ่อน</option><option value="blue">น้ำเงินอ่อน</option><option value="green">เขียวอ่อน</option></select></label>
+  </div></div>
+<svg class="art" viewBox="0 0 370 165" role="img" aria-label="ภาพลายเส้นสมองและหลอดเลือดสมอง แสดงตำแหน่งหลอดเลือดอุดตัน (Ischemic Stroke)">
+<circle cx="150" cy="84" r="74" fill="#e1f0f0" opacity=".8"/>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M70 90C55 70 62 45 85 40C95 22 125 18 142 30C158 16 190 20 200 38C225 38 240 60 232 80C245 95 238 118 218 122C212 138 188 142 175 132C165 142 140 142 132 130C118 138 92 132 90 118C72 116 62 104 70 90Z" stroke="#1f4f6b" stroke-width="2.6" fill="#f4fbfa"/>
+<g stroke="#7fa9bd" stroke-width="1.5"><path d="M148 30C143 58 156 80 148 124"/><path d="M92 62C106 52 118 68 134 58"/><path d="M168 52C184 44 196 60 212 54"/><path d="M98 96C112 88 124 104 138 96"/><path d="M166 100C182 92 196 108 214 98"/><path d="M84 78C94 74 100 80 108 76"/><path d="M196 78C206 72 214 80 224 76"/></g>
+<path d="M168 134C180 152 204 152 216 138" stroke="#1f4f6b" stroke-width="2"/><path d="M178 140C188 146 200 146 208 140" stroke="#7fa9bd" stroke-width="1.4"/>
+<path d="M150 128L147 154M162 130L164 154" stroke="#1f4f6b" stroke-width="2.2"/>
+<g stroke="#1f7a8c" stroke-width="2.3"><path d="M155 152C157 130 152 112 160 96"/><path d="M160 96C175 86 188 80 204 66"/><path d="M160 96C146 86 128 82 112 70"/><path d="M160 96C165 80 168 62 172 46"/>
+<path d="M112 70C104 66 98 58 92 54M112 70C106 76 100 80 94 84M204 66C212 62 218 56 224 50M204 66C214 70 222 74 228 80M172 46C168 40 164 36 158 34M172 46C178 40 184 36 190 34"/></g>
+<circle cx="190" cy="78" r="10" stroke="#a82a45" stroke-width="2" stroke-dasharray="3 3"/><path d="M186 74L194 82M194 74L186 82" stroke="#a82a45" stroke-width="2.4"/>
+<path d="M200 70C214 62 226 66 230 80C226 92 212 92 200 84" stroke="#3a8fc4" stroke-width="1.4" stroke-dasharray="4 4"/>
+</g>
+<g font-family="Sarabun,sans-serif" font-size="9" fill="#1f4f6b"><text x="256" y="50">หลอดเลือดอุดตัน</text><text x="256" y="62">(Ischemic Stroke)</text><path d="M254 68L200 78" stroke="#1f4f6b" stroke-width="1" fill="none"/></g>
+</svg>
+</header>
+
+<nav class="tabs"><button class="on" data-t="s1">ภาพรวมจังหวัด</button><button data-t="s2">เปรียบเทียบหน่วยบริการ</button><button data-t="s3">ตารางรายละเอียด</button><button data-t="s4">ข้อสังเกตและข้อเสนอแนะ</button></nav>
+
+<div class="filters">
+  <div><label for="fi">ตัวชี้วัด (ใช้ในแท็บเปรียบเทียบ/ตาราง)</label><select id="fi"></select></div>
+  <div><label for="fq">ค้นหาหน่วยบริการ</label><input type="search" id="fq" placeholder="เช่น พหล"></div>
+  <div><label for="fs">สถานะ</label><select id="fs"><option value="">ทั้งหมด</option><option value="ok">ผ่านเกณฑ์</option><option value="bad">ไม่ผ่านเกณฑ์</option></select></div>
+  <div><label for="fo">เรียงลำดับ</label><select id="fo"><option value="no">ตามลำดับในตาราง</option><option value="hi">ผลงานมาก → น้อย</option><option value="lo">ผลงานน้อย → มาก</option><option value="b">จำนวนผู้ป่วย (B) มาก → น้อย</option></select></div>
+  <label class="ck"><input type="checkbox" id="fh" checked> ซ่อนหน่วยที่ไม่มีผู้ป่วย (B = 0)</label>
+</div>
+
+<section class="sec on" id="s1">
+  <div class="score" id="score"></div>
+  <div class="card" id="exec"></div>
+  <div class="grid k5" id="kpis"></div>
+  <div class="grid k2">
+    <div class="card"><h2>จำนวนหน่วยบริการที่ผ่าน/ไม่ผ่านเกณฑ์ รายตัวชี้วัด</h2><div class="cv"><canvas id="c_st"></canvas></div></div>
+    <div class="card"><h2>ภาพรวมรายหน่วยบริการ (Heatmap)</h2><div class="tw" id="hm" style="max-height:340px;overflow:auto"></div>
+      <div class="lg"><span style="--c:#cfeedd">ผ่านเกณฑ์</span><span style="--c:#f8d3da">ไม่ผ่านเกณฑ์</span><span style="--c:#dfe9ef">ไม่มีผู้ป่วย</span><span>⚠ ควรตรวจสอบข้อมูล</span></div></div>
+  </div>
+</section>
+
+<section class="sec" id="s2">
+  <div class="card"><h2 id="t_cmp">ผลงานรายหน่วยบริการ</h2><div class="bar" id="cmpsum" style="margin:0 0 10px"></div><div class="cv" style="height:380px"><canvas id="c_cmp"></canvas></div>
+    <div class="lg"><span style="--c:#4aa57a">ผ่านเกณฑ์</span><span style="--c:#d0657c">ไม่ผ่านเกณฑ์</span><span style="--c:#14292f">เส้นประ = เป้าหมาย</span></div></div>
+  <div class="card"><h2>ปริมาณงาน: ตัวตั้ง (A) เทียบตัวหาร (B)</h2><div class="cv" style="height:380px"><canvas id="c_vol"></canvas></div></div>
+</section>
+
+<section class="sec" id="s3">
+  <div class="card"><h2 id="t_tb"></h2><div class="tw"><table><thead id="th_tb"></thead><tbody id="tb"></tbody></table></div>
+  <p class="note" id="lab"></p></div>
+</section>
+
+<section class="sec" id="s4"><div class="grid k2" id="adv"></div><div class="card" id="dq"></div></section>
+
+<p class="note">หมายเหตุ: สถานะ “ผ่าน/ไม่ผ่าน” ใช้ตามคอลัมน์ในชีต · หน่วยที่ไม่มีผู้ป่วย (B = 0) ชีตแสดงเป็น “ผ่าน” ระบบแสดงเป็น “ไม่มีข้อมูล” เพื่อไม่ให้เข้าใจผิด · ระบบตรวจสอบเกณฑ์และการคำนวณร้อยละซ้ำอัตโนมัติ</p>
+</div>
+
+<script>
+/* ===== CONFIG ===== */
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0Dqu3UFdW9iLlroxLoVF9RcHBospQBJXXHlpS5LgYWJnGUmU9auxeP9zI755AUG-E6tuUOG8DxkB/pub?gid=0&single=true&output=csv";
+const REFRESH_SEC=30;                 // ดึงข้อมูลซ้ำอัตโนมัติ (30–60 วินาที)
+const SHORT=["อัตราตาย Stroke (I60-I64)","รักษาใน Stroke Unit ≤72 ชม.","อัตราตาย Ischemic (I63)","อัตราตาย Hemorrhagic (I60-I62)","ได้รับ rt-PA (I63)"];
+const TARGET_OVERRIDE={};             // กำหนดเป้าหมายเอง เช่น {2:{op:"<",val:5}} (ลำดับตัวชี้วัดเริ่มที่ 0)
+const HOSP=["พหลพลพยุหเสนา","มะการักษ์","ทองผาภูมิ","สมเด็จพระสังฆราชองค์ที่ 19","บ่อพลอย","สังขละบุรี","เจ้าคุณไพบูลย์พนมทวน","ด่านมะขามเตี้ย","ท่ากระดาน","ไทรโยค","เลาขวัญ","พยาบาลสถานพระบารมี","สมเด็จพระปิยมหาราชรมณียเขต","ห้วยกระเจาเฉลิมพระเกียรติ 80 พรรษา","ศุกร์ศิริศรีสวัสดิ์","หนองปรือ"];
+const Z="0,0,#DIV/0!,ผ่าน";
+const SNAPSHOT=[",ปีงบประมาณ 2567",
+"ลำดับ,หน่วยบริการ,อัตราตายของผู้ป่วยโรคหลอดเลือด (Stroke: I60-I64),,,,ร้อยละผู้ป่วย I60-I64 ที่มีอาการไม่เกิน 72 ชั่วโมงได้รับการรักษาใน Stroke Unit,,,,อัตราตายของผู้ป่วยโรคหลอดเลือดสมองตีบ(I63),,,,อัตราตายของผู้ป่วยโรคหลอดเลือดสมองแตก (I60-I62),,,,ร้อยละผู้ป่วย I63 ได้รับยาละลายลิ่มเลือด (rt-PA),,,",
+",,เป้าหมาย< ร้อยละ 7,,,,เป้าหมาย ≥ ร้อยละ 80,,,,,,,,เป้าหมาย < ร้อยละ 20,,,,เป้าหมาย > ร้อยละ 12,,,",
+",,A = จำนวนตาย,B = จำนวนจำหน่าย,ผลงาน,ผ่าน/ไม่ผ่าน,A = ได้รับการรักษาใน Stroke Unit,B = ผู้ป่วยที่มีอาการไม่เกิน 72 ชม.,ผลงาน,ผ่าน/ไม่ผ่าน,A = จำนวนตาย I63,B = จำนวนจำหน่าย I63,ผลงาน,ผ่าน/ไม่ผ่าน,A = จำนวนตาย I60-I62,B = จำนวนจำหน่าย I60-I62,ผลงาน,ผ่าน/ไม่ผ่าน,A = ได้รับ rt-PA,B = ผู้ป่วย I63 ทั้งหมด,ผลงาน,ผ่าน/ไม่ผ่าน",
+"1,รพ.พหลพลพยุหเสนา,176,1776,9.91,ไม่ผ่าน,1355,1696,79.894,ไม่ผ่าน,54,1337,4.039,ผ่าน,122,439,27.79,ไม่ผ่าน,160,1337,11.967,ไม่ผ่าน",
+"2,รพ.มะการักษ์,60,656,9.146,ไม่ผ่าน,398,610,65.246,ไม่ผ่าน,16,517,3.095,ผ่าน,44,139,31.655,ไม่ผ่าน,61,517,11.799,ไม่ผ่าน",
+"3,รพ.ทองผาภูมิ,0,103,0,ผ่าน,0,0,#DIV/0!,ผ่าน,0,88,0,ผ่าน,0,88,0,ผ่าน,21,88,23.864,ผ่าน",
+"4,รพ.สมเด็จพระสังฆราชองค์ที่ 19,5,162,3.086,ผ่าน,156,162,96.296,ผ่าน,0,137,0,ผ่าน,5,25,20,ผ่าน,0,137,0,ผ่าน",
+"5,รพ.บ่อพลอย,0,71,0,ผ่าน,0,0,#DIV/0!,ผ่าน,0,63,0,ผ่าน,0,8,0,ผ่าน,0,63,0,ผ่าน",
+"6,รพ.สังขละบุรี,1,29,3.448,ผ่าน,0,0,#DIV/0!,ผ่าน,0,18,0,ผ่าน,1,11,9.091,ผ่าน,3,18,16.667,ผ่าน",
+...HOSP.slice(6).map((n,i)=>`${i+7},รพ.${n},0,0,#DIV/0!,ผ่าน,${[Z,Z,Z,Z].join(",")}`),
+"รวมทั้งสิ้น,,242,2797,8.652,ไม่ผ่าน,1909,2468,77.35,ไม่ผ่าน,70,2160,3.241,ผ่าน,172,710,24.225,ไม่ผ่าน,245,2160,11.343,ไม่ผ่าน"].join("\n");
+
+/* ===== PARSE ===== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>n==null?"–":Number(n).toLocaleString("en-US"),f2=n=>n==null?"–":n.toFixed(2);
+const ST={ok:"ผ่านเกณฑ์",bad:"ไม่ผ่านเกณฑ์",nd:"ไม่มีข้อมูล"},SC={ok:"#4aa57a",bad:"#d0657c",nd:"#9fb4c3"};
+const IC={ok:"✓",bad:"✗",nd:"–"};
+const KC=["#2f8f6f","#2a7fb0","#3fb6a0","#2a5f9e","#4aa38a","#3a8fc4"];
+function parseCSV(t){const R=[];let r=[],c="",q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}
+    else if(ch=='"')q=true;else if(ch==","){r.push(c);c=""}
+    else if(ch=="\n"||ch=="\r"){if(ch=="\r"&&t[i+1]=="\n")i++;r.push(c);R.push(r);r=[];c=""}else c+=ch}
+  if(c!==""||r.length){r.push(c);R.push(r)}return R}
+const num=x=>{const v=parseFloat(String(x??"").replace(/,/g,""));return isNaN(v)?null:v};
+const passOf=(v,op,t)=>op=="<"?v<t:op=="≤"?v<=t:op==">"?v>t:v>=t;
+
+function build(rows){
+  const h=rows.findIndex(r=>(r[0]||"").trim()==="ลำดับ");if(h<0)throw new Error("ไม่พบหัวตาราง");
+  const fy=((rows.slice(0,h).map(r=>r.join(" ")).join(" ")).match(/ปีงบประมาณ\s*\d+/)||[""])[0];
+  const H=rows[h],T=rows[h+1]||[],L=rows[h+2]||[],IND=[];
+  for(let c=2,k=0;(H[c]||"").trim();c+=4,k++){
+    const m=T.slice(c,c+4).join(" ").match(/(≥|≤|<|>)\s*ร้อยละ\s*([\d.]+)/);
+    let op=m?m[1]:null,val=m?parseFloat(m[2]):null;
+    if(TARGET_OVERRIDE[k]){op=TARGET_OVERRIDE[k].op;val=TARGET_OVERRIDE[k].val}
+    const name=H[c].trim();
+    IND.push({c,name,short:SHORT[k]&&H.filter(x=>(x||"").trim()).length-2===SHORT.length?SHORT[k]:name.slice(0,40),op,val,
+      lower:op?(op=="<"||op=="≤"):/อัตราตาย/.test(name),aL:(L[c]||"A").trim(),bL:(L[c+1]||"B").trim()})}
+  const cell=(r,I,k,who)=>{
+    const a=num(r[I.c]),b=num(r[I.c+1]),p=num(r[I.c+2]),s=(r[I.c+3]||"").trim(),flag=[];
+    const pct=b>0?(p!=null?p:(a!=null?a/b*100:null)):null;
+    let state=!(b>0)?"nd":s==="ผ่าน"?"ok":s==="ไม่ผ่าน"?"bad":(I.op&&pct!=null?(passOf(pct,I.op,I.val)?"ok":"bad"):"nd");
+    if(b>0&&a!=null&&p!=null&&Math.abs(a/b*100-p)>0.06)flag.push(`${who}: ร้อยละในชีต (${p}) ไม่ตรงกับ A/B (${(a/b*100).toFixed(2)}) — ${I.short}`);
+    if(b>0&&pct!=null&&I.op&&state!=="nd"&&passOf(pct,I.op,I.val)!==(state==="ok"))flag.push(`${who}: ผลงาน ${f2(pct)}% เทียบเป้าหมาย ${I.op} ${I.val}% ไม่สอดคล้องกับสถานะ “${s}” ในชีต — ${I.short}`);
+    if(b>0&&a!=null&&a>b)flag.push(`${who}: A (${a}) มากกว่า B (${b}) — ${I.short}`);
+    return{a,b,pct,state,flag}};
+  const body=rows.slice(h+3).filter(r=>/^\d+$/.test((r[0]||"").trim())||/รวม/.test(r[0]||""));
+  const hosp=[];let tot=null;
+  body.forEach(r=>{const isT=/รวม/.test(r[0]);const who=isT?"รวมทั้งจังหวัด":(r[1]||"").trim();
+    const o={no:isT?"":(r[0]||"").trim(),name:who,k:IND.map((I,k)=>cell(r,I,k,who))};isT?tot=o:hosp.push(o)});
+  if(!tot){tot={no:"",name:"รวมทั้งจังหวัด",k:IND.map((I,k)=>{const a=hosp.reduce((x,o)=>x+(o.k[k].a||0),0),b=hosp.reduce((x,o)=>x+(o.k[k].b||0),0),pct=b>0?a/b*100:null;
+    return{a,b,pct,flag:[],state:b>0&&I.op?(passOf(pct,I.op,I.val)?"ok":"bad"):"nd"}})}}
+  return{fy,IND,hosp,tot}}
+
+/* ===== FETCH ===== */
+let D=null,left=REFRESH_SEC,busy=false,CH={},lastHash="";
+async function load(){
+  if(busy)return;busy=true;$("st").className="pill wait";$("st").textContent="กำลังดึงข้อมูล…";
+  try{
+    const res=await fetch(CSV_URL+(CSV_URL.includes("?")?"&":"?")+"_="+Date.now(),{cache:"no-store"});if(!res.ok)throw new Error(res.status);
+    const txt=await res.text();D=build(parseCSV(txt));
+    const hs=txt.length+":"+txt.split("").reduce((x,c,i)=>(x+c.charCodeAt(0)*(i%31+1))%1000003,0);
+    $("st").className="pill ok";$("st").textContent=lastHash&&hs!==lastHash?"พบข้อมูลมีการแก้ไข · อัปเดตแล้ว":"เชื่อมต่อ Google Sheet แล้ว";lastHash=hs;
+    $("upd").textContent="อัปเดตล่าสุด: "+new Date().toLocaleTimeString("th-TH")+" น.";
+  }catch(e){
+    if(!D){D=build(parseCSV(SNAPSHOT));$("st").textContent="เชื่อมต่อไม่ได้ · แสดงข้อมูลสำรองที่บันทึกไว้"}
+    else $("st").textContent="เชื่อมต่อไม่ได้ · แสดงข้อมูลล่าสุดเดิม (จะลองใหม่อัตโนมัติ)";
+    $("st").className="pill err"}
+  busy=false;left=REFRESH_SEC;render()}
+setInterval(()=>{left--;if(left<=0)load();$("cd").textContent="รีเฟรชใน "+Math.max(left,0)+" วินาที"},1000);
+
+/* ===== RENDER ===== */
+function mk(id,cfg){if(CH[id])CH[id].destroy();if(!window.Chart)return;
+  Chart.defaults.font.family="Sarabun,sans-serif";Chart.defaults.color="#14292f";Chart.defaults.borderColor="rgba(22,50,58,.12)";CH[id]=new Chart($(id),cfg)}
+const tgtTxt=I=>I.op?`${I.op} ${I.val}%`:"ไม่ระบุในชีต";
+const gapTxt=(I,p)=>{if(!I.op||p==null)return"";const d=p-I.val;return`${d>=0?"สูงกว่า":"ต่ำกว่า"}เป้าหมาย ${Math.abs(d).toFixed(2)} จุดร้อยละ`};
+function need(I,c){ // จำนวนราย A ที่ต้องปรับเพื่อให้ผ่านเกณฑ์
+  if(!I.op||c.b==null||c.a==null||c.state!=="bad")return null;const lim=I.val*c.b/100;
+  if(I.lower){const mx=I.op=="<"?Math.ceil(lim)-1:Math.floor(lim);return Math.max(0,c.a-mx)}
+  const mn=I.op==">"?Math.floor(lim)+1:Math.ceil(lim);return Math.max(0,mn-c.a)}
+function list(k){const q=$("fq").value.trim(),s=$("fs").value,hide=$("fh").checked,o=$("fo").value;
+  let L=D.hosp.filter(h=>(!q||h.name.includes(q))&&(!hide||h.k[k].state!=="nd")&&(!s||h.k[k].state===s));
+  const v=h=>h.k[k].pct??-1;
+  if(o==="hi")L.sort((a,b)=>v(b)-v(a));if(o==="lo")L.sort((a,b)=>v(a)-v(b));if(o==="b")L.sort((a,b)=>(b.k[k].b||0)-(a.k[k].b||0));return L}
+
+function render(){
+  if(!D)return;const{IND,hosp,tot}=D;
+  if($("fi").options.length!==IND.length){$("fi").innerHTML=IND.map((I,k)=>`<option value="${k}">${k+1}. ${esc(I.short)}</option>`).join("")}
+  $("fy").textContent=`${D.fy||""} · สำนักงานสาธารณสุขจังหวัดกาญจนบุรี · เชื่อมต่อ Google Sheet โดยตรง`;
+  const K=+$("fi").value||0,I=IND[K];
+  /* exec summary */
+  const okN=tot.k.filter(c=>c.state==="ok").length,badK=IND.map((x,k)=>k).filter(k=>tot.k[k].state==="bad");
+  const withData=hosp.filter(h=>h.k[0].b>0),tb=tot.k[0].b||0,top=[...withData].sort((a,b)=>b.k[0].b-a.k[0].b).slice(0,2);
+  const nFlag=hosp.concat(tot).reduce((x,h)=>x+h.k.reduce((y,c)=>y+c.flag.length,0),0);
+  $("exec").innerHTML=`<h2>สรุปผู้บริหาร ${esc(D.fy)}</h2><ul>
+   <li>ภาพรวมจังหวัด <b>ผ่านเกณฑ์ ${okN} จาก ${IND.length} ตัวชี้วัด</b>${badK.length?` · ไม่ผ่าน: ${badK.map(k=>esc(IND[k].short)).join(", ")}`:""}</li>
+   <li>มีหน่วยบริการที่รายงานผู้ป่วย Stroke ${withData.length} จาก ${hosp.length} แห่ง${top.length&&tb?` · ${top.map(h=>esc(h.name)).join(" และ ")} รวมกันคิดเป็นร้อยละ ${(top.reduce((x,h)=>x+h.k[0].b,0)/tb*100).toFixed(1)} ของผู้ป่วยจำหน่ายทั้งจังหวัด`:""}</li>
+   ${nFlag?`<li>พบข้อมูลที่ควรตรวจสอบกับต้นทาง ${nFlag} รายการ (ดูแท็บข้อสังเกตฯ)</li>`:""}</ul>`;
+  const okK=IND.map((x,k)=>k).filter(k=>tot.k[k].state==="ok"),hc=(k,s)=>hosp.filter(h=>h.k[k].state===s).length;
+  const li=(k,m)=>`<li>${m} <b>${esc(IND[k].short)}</b> — ${f2(tot.k[k].pct)}%<div class="d">เป้าหมาย ${tgtTxt(IND[k])} · หน่วยบริการผ่าน ${hc(k,"ok")} / ${hc(k,"ok")+hc(k,"bad")} แห่งที่มีข้อมูล</div></li>`;
+  $("score").innerHTML=`<div class="sc ok"><h2>✓ ผ่านเกณฑ์ (ระดับจังหวัด)</h2><div class="big">${okK.length}<small> / ${IND.length} ตัวชี้วัด</small></div><ul>${okK.map(k=>li(k,"✓")).join("")||"<li>ยังไม่มีตัวชี้วัดที่ผ่านเกณฑ์</li>"}</ul></div>
+   <div class="sc bad"><h2>✗ ไม่ผ่านเกณฑ์ (ระดับจังหวัด)</h2><div class="big">${badK.length}<small> / ${IND.length} ตัวชี้วัด</small></div><ul>${badK.map(k=>li(k,"✗")).join("")||"<li>ผ่านเกณฑ์ครบทุกตัวชี้วัด</li>"}</ul></div>`;
+  /* KPI cards */
+  $("kpis").innerHTML=IND.map((x,k)=>{const c=tot.k[k],sc=x.lower?Math.max(x.val*2||5,(c.pct||0)*1.15,5):100,w=Math.min((c.pct||0)/sc*100,100),tp=x.op?Math.min(x.val/sc*100,100):null,nd=need(x,c);
+    return`<div class="card kpi ${c.state}"><div class="top" style="background:${KC[k%6]}"></div><div class="in">
+     <div class="nm">${k+1}. ${esc(x.short)}</div><div class="fl">${esc(x.name)}</div>
+     <div class="n">${f2(c.pct)}%</div>
+     <div class="track" aria-hidden="true"><i style="width:${w}%;background:${SC[c.state]}"></i>${tp!=null?`<b style="left:${tp}%"></b>`:""}</div>
+     <div><span class="badge lg b-${c.state}">${IC[c.state]} ${ST[c.state]}</span> <span class="d">เป้าหมาย ${tgtTxt(x)}</span></div>
+     <div class="d">${fmt(c.a)} / ${fmt(c.b)} ราย${x.op?" · "+gapTxt(x,c.pct):""}</div>
+     ${nd?`<div class="d">เพื่อถึงเป้าหมาย ต้อง${x.lower?"ลดผู้เสียชีวิต":"เพิ่มผู้ได้รับบริการ"}อีกอย่างน้อย <b>${fmt(nd)}</b> ราย</div>`:""}</div></div>`}).join("");
+  /* status chart */
+  const cnt=s=>IND.map((x,k)=>hosp.filter(h=>h.k[k].state===s).length);
+  mk("c_st",{type:"bar",data:{labels:IND.map(x=>x.short),datasets:["ok","bad","nd"].map(s=>({label:ST[s],data:cnt(s),backgroundColor:s==="nd"?"#b9cbd6":SC[s]}))},
+    options:{indexAxis:"y",maintainAspectRatio:false,scales:{x:{stacked:true,ticks:{precision:0},title:{display:true,text:"จำนวนหน่วยบริการ"}},y:{stacked:true}},plugins:{legend:{position:"bottom"}}}});
+  /* heatmap */
+  const hh=hosp.filter(h=>(!$("fq").value.trim()||h.name.includes($("fq").value.trim()))&&(!$("fh").checked||h.k.some(c=>c.state!=="nd")));
+  $("hm").innerHTML=`<table class="hm"><thead><tr><th style="text-align:left">หน่วยบริการ</th>${IND.map((x,k)=>`<th>${k+1}. ${esc(x.short)}<br><span class="note">${tgtTxt(x)}</span></th>`).join("")}<th>ผ่านเกณฑ์</th></tr></thead><tbody>`+
+    hh.map(h=>`<tr><td class="nm">${esc(h.name)}</td>${h.k.map(c=>`<td class="${c.state}">${c.state==="nd"?"–":IC[c.state]+" "+f2(c.pct)+"%"}${c.flag.length?" ⚠":""}</td>`).join("")}<td class="nm"><b>${h.k.filter(c=>c.state==="ok").length}</b> / ${h.k.filter(c=>c.state!=="nd").length}</td></tr>`).join("")+`</tbody></table>`;
+  /* compare */
+  const L=list(K);$("t_cmp").textContent=`ผลงานรายหน่วยบริการ: ${I.short} (เป้าหมาย ${tgtTxt(I)})`;
+  $("cmpsum").innerHTML=["ok","bad","nd"].map(s=>`<span class="badge lg b-${s}">${IC[s]} ${ST[s]} ${hc(K,s)} แห่ง</span>`).join("");
+  mk("c_cmp",{data:{labels:L.map(h=>h.name),datasets:[{type:"bar",label:"ผลงาน (%)",data:L.map(h=>h.k[K].pct),backgroundColor:L.map(h=>SC[h.k[K].state])},
+    ...(I.op?[{type:"line",label:"เป้าหมาย",data:L.map(()=>I.val),borderColor:"#16323a",borderDash:[6,5],pointRadius:0,borderWidth:2}]:[])]},
+    options:{maintainAspectRatio:false,scales:{x:{ticks:{maxRotation:60,minRotation:35}},y:{beginAtZero:true,title:{display:true,text:"ร้อยละ"}}},plugins:{legend:{position:"bottom"}}}});
+  mk("c_vol",{type:"bar",data:{labels:L.map(h=>h.name),datasets:[{label:"B: "+I.bL.slice(0,60),data:L.map(h=>h.k[K].b),backgroundColor:"#7fb6dc"},{label:"A: "+I.aL.slice(0,60),data:L.map(h=>h.k[K].a),backgroundColor:"#6dbf9f"}]},
+    options:{maintainAspectRatio:false,scales:{x:{ticks:{maxRotation:60,minRotation:35}},y:{beginAtZero:true,title:{display:true,text:"ราย/ครั้ง"}}},plugins:{legend:{position:"bottom"}}}});
+  /* table */
+  $("t_tb").textContent=`${K+1}. ${I.name} · เป้าหมาย ${tgtTxt(I)}`;
+  $("th_tb").innerHTML=`<tr><th>ลำดับ</th><th>หน่วยบริการ</th><th class="num">A</th><th class="num">B</th><th class="num">ผลงาน (%)</th><th class="num">ส่วนต่างจากเป้า (จุด)</th><th>สถานะ</th></tr>`;
+  const row=(h,cls)=>{const c=h.k[K];return`<tr class="${cls||""}"><td>${esc(h.no)}</td><td>${esc(h.name)}</td><td class="num">${fmt(c.a)}</td><td class="num">${fmt(c.b)}</td><td class="num">${f2(c.pct)}</td><td class="num">${I.op&&c.pct!=null?(c.pct-I.val>=0?"+":"")+(c.pct-I.val).toFixed(2):"–"}</td><td><span class="badge b-${c.state}">${IC[c.state]} ${ST[c.state]}</span>${c.flag.length?" ⚠":""}</td></tr>`};
+  $("tb").innerHTML=(L.length?L.map(h=>row(h)).join(""):'<tr><td colspan="7" style="text-align:center;color:var(--sub)">ไม่พบข้อมูลตามตัวกรอง</td></tr>')+row(tot,"tot");
+  $("lab").textContent=`A = ${I.aL} · B = ${I.bL}`;
+  /* advice */
+  $("adv").innerHTML=IND.map((x,k)=>{const c=tot.k[k],bad=hosp.filter(h=>h.k[k].state==="bad"),nd=need(x,c),li=[];
+    li.push(`ระดับจังหวัด ${f2(c.pct)}% (${ST[c.state]})${x.op?` เทียบเป้าหมาย ${tgtTxt(x)} · ${gapTxt(x,c.pct)}`:""}`);
+    if(nd)li.push(`ต้อง${x.lower?"ลดผู้เสียชีวิต":"เพิ่มผู้ได้รับบริการ"}อีกอย่างน้อย ${fmt(nd)} ราย จึงจะถึงเกณฑ์`);
+    if(bad.length){const r=[...bad].sort((a,b)=>x.lower?b.k[k].a-a.k[k].a:(need(x,b.k[k])||0)-(need(x,a.k[k])||0)).slice(0,3);
+      li.push(`หน่วยที่ไม่ผ่าน ${bad.length} แห่ง · ควรเร่งติดตาม: ${r.map(h=>`${esc(h.name)} (${f2(h.k[k].pct)}%${x.lower&&c.a?`, ร้อยละ ${(h.k[k].a/c.a*100).toFixed(0)} ของผู้เสียชีวิตทั้งจังหวัด`:""})`).join(", ")}`)}
+    else li.push("ไม่มีหน่วยบริการที่ไม่ผ่านเกณฑ์ในรายงาน");
+    const ndn=hosp.filter(h=>h.k[k].state==="nd").length;if(ndn)li.push(`${ndn} แห่งไม่มีผู้ป่วยในตัวหาร (B = 0) จึงไม่นำมาประเมิน`);
+    return`<div class="card"><h2>${k+1}. ${esc(x.short)}</h2><ul>${li.map(t=>`<li>${t}</li>`).join("")}</ul></div>`}).join("");
+  const fl=hosp.concat(tot).flatMap(h=>h.k.flatMap(c=>c.flag));
+  $("dq").innerHTML=`<h2>ข้อควรตรวจสอบคุณภาพข้อมูล</h2>`+(fl.length?`<ul>${fl.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:"<p>ไม่พบความไม่สอดคล้องของข้อมูล</p>")}
+
+/* ===== UI ===== */
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".sec").forEach(s=>s.classList.toggle("on",s.id===b.dataset.t));
+  Object.values(CH).forEach(c=>c.resize())});
+["fi","fq","fs","fo","fh"].forEach(id=>$(id).addEventListener("input",render));
+$("rf").onclick=load;$("th").onchange=e=>document.body.dataset.theme=e.target.value;
+load();
+</script>
+</body>
+</html>
